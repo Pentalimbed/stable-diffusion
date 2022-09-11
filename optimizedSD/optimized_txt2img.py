@@ -120,12 +120,14 @@ def get_image(opt, model, modelCS, modelFS, prompt=None):
                     x_samples_ddim = torch.clamp((x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
 
                     if not opt.skip_save:
+                        folder_path = os.path.join(outpath + "/" + str(opt.prompt).replace("/", "")[:100] + "/")
+                        
                         for x_sample in x_samples_ddim:
                             x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
-                            if not os.path.exists(outpath + "/" + str(opt.prompt).replace("/", "")[:100] + "/"):
-                                os.mkdir(outpath + "/" + str(opt.prompt).replace("/", "")[:100] + "/")
+                            if not os.path.exists(folder_path):
+                                os.mkdir(folder_path)
                             Image.fromarray(x_sample.astype(np.uint8)).save(
-                                os.path.join(outpath + "/" + str(opt.prompt).replace("/", "")[:100] + "/", f"{base_count:05}.png"))
+                                os.path.join(folder_path, f"{base_count:05}.png"))
                             opt.seed += 1
                             base_count += 1
 
