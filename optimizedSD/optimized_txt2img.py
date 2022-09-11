@@ -120,8 +120,8 @@ def get_image(opt, model, modelCS, modelFS, prompt=None):
                         x_samples_ddim = modelFS.decode_first_stage(samples_ddim[i].unsqueeze(0))
                         x_sample = torch.clamp((x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
                         
-                        Image.fromarray((255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')).astype(np.uint8)).save(
-                                    os.path.join(sample_path, f"{base_count:05}.png"))
+                        x_sample_individual = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
+                        Image.fromarray(x_sample_individual.astype(np.uint8)).save(os.path.join(sample_path, f"{base_count:05}.png"))
                         
                         if not opt.skip_grid:
                             all_samples.append(x_sample.to("cpu"))
