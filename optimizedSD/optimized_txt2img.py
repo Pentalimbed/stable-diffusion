@@ -14,7 +14,7 @@ from omegaconf import OmegaConf
 from pytorch_lightning import seed_everything
 from torch import autocast
 from torchvision.utils import make_grid
-from tqdm import tqdm, trange
+from tqdm.auto import tqdm, trange
 from transformers import logging
 
 from ldm.util import instantiate_from_config
