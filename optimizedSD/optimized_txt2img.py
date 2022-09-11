@@ -116,7 +116,7 @@ def get_image(opt, model, modelCS, modelFS, prompt=None):
 
                     print(samples_ddim.shape)
                     print("saving images")
-                    x_samples_ddim = model.decode_first_stage(samples_ddim)
+                    x_samples_ddim = modelFS.decode_first_stage(samples_ddim)
                     x_samples_ddim = torch.clamp((x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
 
                     if not opt.skip_save:
