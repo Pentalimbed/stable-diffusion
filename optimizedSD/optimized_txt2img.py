@@ -116,20 +116,20 @@ def get_image(opt, model, modelCS, modelFS, prompt=None):
 
                     print(samples_ddim.shape)
                     print("saving images")
-                    for i in range(batch_size):
-                        x_samples_ddim = modelFS.decode_first_stage(samples_ddim[i].unsqueeze(0))
-                        x_sample = torch.clamp((x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
-                        
-                        x_sample_individual = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
-                        Image.fromarray(x_sample_individual.astype(np.uint8)).save(os.path.join(sample_path, f"{base_count:05}.png"))
-                        
-                        if not opt.skip_grid:
-                            all_samples.append(x_sample.to("cpu"))
-                            
-                        seeds += str(opt.seed) + ","
-                        opt.seed += 1
-                        base_count += 1
+                    x_samples_ddim = model.decode_first_stage(samples_ddim)
+                    x_samples_ddim = torch.clamp((x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
 
+                    if not opt.skip_save:
+                        for x_sample in x_samples_ddim:
+                            x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
+                            Image.fromarray(x_sample.astype(np.uint8)).save(
+                                os.path.join(sample_path, f"{base_count:05}.png"))
+                            opt.seed += 1
+                            base_count += 1
+
+                    if not opt.skip_grid:
+                        all_samples.append(x_samples_ddim)
+                        
                     if opt.device != "cpu":
                         mem = torch.cuda.memory_allocated() / 1e6
                         modelFS.to("cpu")
@@ -149,9 +149,15 @@ def get_image(opt, model, modelCS, modelFS, prompt=None):
     )
     
     if not opt.skip_grid:
-        grid = torch.cat(all_samples, 0)
-        grid = make_grid(grid, nrow=opt.n_iter)
-        grid = 255.0 * rearrange(grid, "c h w -> h w c").cpu().numpy()
+                    # additionally, save as grid
+                    grid = torch.stack(all_samples, 0)
+                    grid = rearrange(grid, 'n b c h w -> (n b) c h w')
+                    grid = make_grid(grid, nrow=n_rows)
+
+                    # to image
+                    grid = 255. * rearrange(grid, 'c h w -> h w c').cpu().numpy()
+                    Image.fromarray(grid.astype(np.uint8)).save(os.path.join(outpath, f'grid-{grid_count:04}.png'))
+                    grid_count += 1
 
     return Image.fromarray(grid.astype(np.uint8))
 
