@@ -119,7 +119,13 @@ def get_image(opt, model, modelCS, modelFS, prompt=None):
                     for i in range(batch_size):
                         x_samples_ddim = modelFS.decode_first_stage(samples_ddim[i].unsqueeze(0))
                         x_sample = torch.clamp((x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
-                        all_samples.append(x_sample.to("cpu"))
+                        
+                        Image.fromarray((255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')).astype(np.uint8)).save(
+                                    os.path.join(sample_path, f"{base_count:05}.png"))
+                        
+                        if not opt.skip_grid:
+                            all_samples.append(x_sample.to("cpu"))
+                            
                         seeds += str(opt.seed) + ","
                         opt.seed += 1
                         base_count += 1
@@ -141,10 +147,11 @@ def get_image(opt, model, modelCS, modelFS, prompt=None):
                 "Samples finished in {0:.2f} minutes"
         ).format(time_taken)
     )
-
-    grid = torch.cat(all_samples, 0)
-    grid = make_grid(grid, nrow=opt.n_iter)
-    grid = 255.0 * rearrange(grid, "c h w -> h w c").cpu().numpy()
+    
+    if not opt.skip_grid:
+        grid = torch.cat(all_samples, 0)
+        grid = make_grid(grid, nrow=opt.n_iter)
+        grid = 255.0 * rearrange(grid, "c h w -> h w c").cpu().numpy()
 
     return Image.fromarray(grid.astype(np.uint8))
 
