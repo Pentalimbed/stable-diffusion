@@ -123,7 +123,7 @@ def get_image(opt, model, modelCS, modelFS, prompt=None):
                         for x_sample in x_samples_ddim:
                             x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
                             Image.fromarray(x_sample.astype(np.uint8)).save(
-                                os.path.join(sample_path, f"{base_count:05}.png"))
+                                os.path.join(outpath + "/" + str(opt.prompt).replace("/", "")[:100] + "/", f"{base_count:05}.png"))
                             opt.seed += 1
                             base_count += 1
 
@@ -149,17 +149,17 @@ def get_image(opt, model, modelCS, modelFS, prompt=None):
     )
     
     if not opt.skip_grid:
-                    # additionally, save as grid
-                    grid = torch.stack(all_samples, 0)
-                    grid = rearrange(grid, 'n b c h w -> (n b) c h w')
-                    grid = make_grid(grid, nrow=n_rows)
+        # additionally, save as grid
+        grid = torch.stack(all_samples, 0)
+        grid = rearrange(grid, 'n b c h w -> (n b) c h w')
+        grid = make_grid(grid, nrow=n_rows)
 
-                    # to image
-                    grid = 255. * rearrange(grid, 'c h w -> h w c').cpu().numpy()
-                    Image.fromarray(grid.astype(np.uint8)).save(os.path.join(outpath, f'grid-{grid_count:04}.png'))
-                    grid_count += 1
+        # to image
+        grid = 255. * rearrange(grid, 'c h w -> h w c').cpu().numpy()
+        Image.fromarray(grid.astype(np.uint8)).save(os.path.join(outpath + "/" + str(opt.prompt).replace("/", "")[:100] + f".{opt.format}"))
+        grid_count += 1
 
-    return Image.fromarray(grid.astype(np.uint8))
+        return Image.fromarray(grid.astype(np.uint8))
 
 
 if __name__ == '__main__':
@@ -371,7 +371,5 @@ if __name__ == '__main__':
         _model,
         _modelCS,
         _modelFS
-    ).save(
-        os.path.join(outpath + "/" + str(opt.prompt).replace("/", "")[:100] + f".{opt.format}")
     )
     print("exported to", outpath + "/" + str(opt.prompt).replace("/", "")[:100] + f".{opt.format}")
