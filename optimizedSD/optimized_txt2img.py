@@ -122,6 +122,8 @@ def get_image(opt, model, modelCS, modelFS, prompt=None):
                     if not opt.skip_save:
                         for x_sample in x_samples_ddim:
                             x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
+                            if ! os.path.exists(outpath + "/" + str(opt.prompt).replace("/", "")[:100] + "/"):
+                                os.mkdir(outpath + "/" + str(opt.prompt).replace("/", "")[:100] + "/")
                             Image.fromarray(x_sample.astype(np.uint8)).save(
                                 os.path.join(outpath + "/" + str(opt.prompt).replace("/", "")[:100] + "/", f"{base_count:05}.png"))
                             opt.seed += 1
