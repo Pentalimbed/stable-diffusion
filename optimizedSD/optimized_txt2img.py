@@ -161,7 +161,6 @@ def get_image(opt, model, modelCS, modelFS, prompt=None):
         # to image
         grid = 255. * rearrange(grid, 'c h w -> h w c').cpu().numpy()
         Image.fromarray(grid.astype(np.uint8)).save(os.path.join(outpath + "/" + str(opt.prompt).replace("/", "")[:100] + f".{opt.format}"))
-        grid_count += 1
 
         return Image.fromarray(grid.astype(np.uint8))
 
