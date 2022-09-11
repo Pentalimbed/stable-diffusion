@@ -124,10 +124,8 @@ def get_image(opt, model, modelCS, modelFS, prompt=None):
                         
                         for x_sample in x_samples_ddim:
                             x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
-                            if not os.path.exists(folder_path):
-                                os.mkdir(folder_path)
                             Image.fromarray(x_sample.astype(np.uint8)).save(
-                                os.path.join(folder_path, f"{base_count:05}.png"))
+                                os.path.join(sample_path, f"{base_count:05}.png"))
                             opt.seed += 1
                             base_count += 1
 
